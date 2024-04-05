@@ -573,7 +573,7 @@ def extract_model_operations(in_model):
       
       size_i = input_shape[-1]
       size_o = output_shape[-1]
-      repetitions = input_shape[1:-1]
+      repetitions = sum(input_shape[1:-1])
 
       number_of_operations = int(repetitions * size_i * size_o)
 
