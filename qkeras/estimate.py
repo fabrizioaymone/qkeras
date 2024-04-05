@@ -568,23 +568,14 @@ def extract_model_operations(in_model):
         logging.warning("%s bias is unquantized!", layer.name)
 
     elif layer.__class__.__name__ in ["QDense"]:
+      # the last dimension of the input and the last dimension of the output determine 
+      # the weights, while the other dimensions determine how many times the Dense operation is performed
+      
+      size_i = input_shape[-1]
+      size_o = output_shape[-1]
+      repetitions = input_shape[1:-1]
 
-      # Find the input and output shapes out of all possible dimensions.
-      # Usually the first shape dimension will be the batch size, and the second
-      # shape dimension will be the number of channels. However, if the
-      # Dense layer is in Squeeze-and-Excite, the first shape dimension
-      # will be the batch size, the second and third shape dimension will be the
-      # spatial sizes (should both be 1), and the fourth shape dimensions will
-      # be the number of channels
-      ishape = np.array([i for i in input_shape if i is not None])
-      assert sum(ishape > 1) == 1, "Tensor shape has multiple >1 size dims"
-      size_i = np.max(ishape)
-
-      oshape = np.array([i for i in output_shape if i is not None])
-      assert sum(oshape > 1) == 1, "Tensor shape has multiple >1 size dims"
-      size_o = np.max(oshape)
-
-      number_of_operations = int(size_i * size_o)
+      number_of_operations = int(repetitions * size_i * size_o)
 
       number_of_weights = size_i * size_o
       number_of_bias = 0
