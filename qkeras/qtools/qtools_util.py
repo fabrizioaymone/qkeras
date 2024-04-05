@@ -197,7 +197,7 @@ def get_operation_count(layer, input_shape):
 
     size_i = input_shape[-1]
     size_o = output_shape[-1]
-    repetitions = input_shape[1:-1]
+    repetitions = sum(input_shape[1:-1])
     
     operation_count = (repetitions * size_i * size_o)
 
