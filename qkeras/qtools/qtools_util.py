@@ -194,28 +194,12 @@ def get_operation_count(layer, input_shape):
 
   elif layer.__class__.__name__ in ["QDense", "Dense"]:
     output_shape = layer.compute_output_shape(input_shape)
-    # Find the input and output shapes out of all possible dimensions.
-    # Usually, the first shape dimension will be the batch size, and the second
-    # shape dimension will be the number of channels. However, if the
-    # Dense layer is in Squeeze-and-Excite, the first shape dimension
-    # will be the batch size, the second and third shape dimension will be the
-    # spatial sizes (should both be 1), and the fourth shape dimensions will
-    # be the number of channels
-    #
-    # Note: asserts have been changed to sum(*shape > 1) <= 1 to avoid the case
-    # when the dense layer has an output with shape (None, 1), which results in
-    # sum(oshape > 1) = 0.
-    ishape = np.array([i for i in input_shape if i is not None])
-    assert sum(ishape > 1) <= 1, ("Input Tensor shape in %s has "
-                                  "multiple >1 size dims") % layer.name
-    size_i = np.max(ishape)
 
-    oshape = np.array([i for i in output_shape if i is not None])
-    assert sum(oshape > 1) <= 1, ("Output Tensor shape in %s has " +
-                                  "multiple >1 size dims") % layer.name
-    size_o = np.max(oshape)
-
-    operation_count = (size_i * size_o)
+    size_i = input_shape[-1]
+    size_o = output_shape[-1]
+    repetitions = input_shape[1:-1]
+    
+    operation_count = (repetitions * size_i * size_o)
 
   else:
     print("operation count for {} is defaulted to 0".format(
