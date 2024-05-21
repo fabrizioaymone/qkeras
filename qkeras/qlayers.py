@@ -726,7 +726,8 @@ class QDense(Dense, PrunableLayer):
 
 
 def get_constraint(identifier, quantizer):
-  """Gets the initializer.
+  """Applies kernel constraint on the dequantized float32 weights. It is different from the clipping that happens during
+  the quantization process (refer to _scale_clip_and_round() method in quantizer classes).
 
   Args:
     identifier: A constraint, which could be dict, string, or callable function.
@@ -740,9 +741,9 @@ def get_constraint(identifier, quantizer):
       return Clip.from_config(identifier['config'])
     else:
       return constraints.get(identifier)
+  # if no kernel_constraint is indicated, it returns None 
   else:
-    max_value = max(1, quantizer.max()) if hasattr(quantizer, "max") else 1.0
-    return Clip(-max_value, max_value, identifier, quantizer)
+    return None
 
 def get_initializer(identifier):
   """Gets the initializer.
